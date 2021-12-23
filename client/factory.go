@@ -46,11 +46,21 @@ func (f *factory) Create(options ...Option) *Client {
 	rClient := retryablehttp.NewClient()
 	rClient.Logger = c.logger
 
-	rClient.RetryMax = c.config.RetryMax
-	rClient.RetryWaitMin = time.Duration(c.config.RetryWaitMinMs) * time.Millisecond
+	rClient.RetryMax = 0
+	if c.config.RetryMax != nil {
+		rClient.RetryMax = *c.config.RetryMax
+	}
+
+	if c.config.RetryWaitMinMs != nil {
+		rClient.RetryWaitMin = time.Duration(*c.config.RetryWaitMinMs) * time.Millisecond
+	}
 
 	c.Client = rClient.StandardClient()
-	c.Client.Timeout = time.Duration(c.config.TimeoutMs) * time.Millisecond
+
+	c.Client.Timeout = 10 * time.Second
+	if c.config.TimeoutMs != nil {
+		c.Client.Timeout = time.Duration(*c.config.TimeoutMs) * time.Millisecond
+	}
 
 	return c
 }

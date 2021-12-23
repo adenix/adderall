@@ -12,6 +12,7 @@ import (
 	"github.com/opentracing-contrib/go-stdlib/nethttp"
 	"github.com/opentracing/opentracing-go"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"go.adenix.dev/adderall/internal/pointer"
 )
 
 // Server represents a http server
@@ -29,15 +30,15 @@ type Server struct {
 func (s *Server) Serve(ctx context.Context) error { //Take serve options
 	handler := s.getHandler(ctx)
 	port := s.config.Port
-	if port < 1 {
-		port = 8080
+	if port == nil || *port < 1 {
+		port = pointer.IntP(8080)
 	}
 
 	srvr := http.Server{
-		Addr:         fmt.Sprintf(":%d", port),
+		Addr:         fmt.Sprintf(":%d", *port),
 		Handler:      handler,
-		ReadTimeout:  time.Duration(s.config.ReadTimeoutMs) * time.Millisecond,
-		WriteTimeout: time.Duration(s.config.WriteTimeoutMs) * time.Millisecond,
+		ReadTimeout:  time.Duration(*s.config.ReadTimeoutMs) * time.Millisecond,
+		WriteTimeout: time.Duration(*s.config.WriteTimeoutMs) * time.Millisecond,
 	}
 
 	errs := make(chan error)
@@ -61,8 +62,8 @@ func (s *Server) Serve(ctx context.Context) error { //Take serve options
 
 func (s *Server) addSwagger(r Handler) {
 	swaggerFileLocation := "/swagger.json"
-	if len(s.config.SwaggerFile) > 0 {
-		swaggerFileLocation = s.config.SwaggerFile
+	if s.config.SwaggerFile != nil && len(*s.config.SwaggerFile) > 0 {
+		swaggerFileLocation = *s.config.SwaggerFile
 	}
 
 	if _, err := os.Stat(swaggerFileLocation); err != nil {
@@ -119,7 +120,7 @@ func (s *Server) tracingMiddleware() func(http.Handler) http.Handler {
 // TimeoutMiddleware ...
 func (s *Server) timeoutMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return http.TimeoutHandler(next, time.Duration(s.config.RequestTimeoutSec)*time.Second, "timeout")
+		return http.TimeoutHandler(next, time.Duration(*s.config.RequestTimeoutSec)*time.Second, "timeout")
 	}
 }
 
@@ -139,7 +140,7 @@ func (s *Server) gracefulShutdown(ctx context.Context, server *http.Server) erro
 	sig := <-quit
 	s.logger.InfoCtx(ctx, "signal received", "signal", sig)
 
-	timeout := time.Duration(s.config.ShutdownDelaySeconds) * time.Second
+	timeout := time.Duration(*s.config.ShutdownDelaySeconds) * time.Second
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
@@ -196,21 +197,21 @@ type Handler interface {
 }
 
 type Config struct {
-	Port                 int
-	ReadTimeoutMs        int
-	WriteTimeoutMs       int
-	RequestTimeoutSec    int
-	ShutdownDelaySeconds int
-	SwaggerFile          string
+	Port                 *int
+	ReadTimeoutMs        *int
+	WriteTimeoutMs       *int
+	RequestTimeoutSec    *int
+	ShutdownDelaySeconds *int
+	SwaggerFile          *string
 }
 
 func defaultConfig() Config {
 	return Config{
-		Port:                 8080,
-		ReadTimeoutMs:        10000,
-		WriteTimeoutMs:       10000,
-		RequestTimeoutSec:    10,
-		ShutdownDelaySeconds: 5,
-		SwaggerFile:          "/swagger.json",
+		Port:                 pointer.IntP(8080),
+		ReadTimeoutMs:        pointer.IntP(10000),
+		WriteTimeoutMs:       pointer.IntP(10000),
+		RequestTimeoutSec:    pointer.IntP(10),
+		ShutdownDelaySeconds: pointer.IntP(5),
+		SwaggerFile:          pointer.StringP("/swagger.json"),
 	}
 }

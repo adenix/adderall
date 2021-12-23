@@ -11,7 +11,7 @@ import (
 
 func NewServerFactory(config server.Config, logger logger.Logger, tracer opentracing.Tracer) server.Factory {
 	return server.NewFactory(
-		// server.WithConfig(config),
+		server.WithConfig(config),
 		server.WithLogger(logger),
 		server.WithTracer(tracer),
 		server.WithRouter(func() server.Handler {
@@ -21,7 +21,7 @@ func NewServerFactory(config server.Config, logger logger.Logger, tracer opentra
 
 func NewClientFactory(config client.Config, logger logger.Logger, tracer opentracing.Tracer) client.Factory {
 	return client.NewFactory(
-		// client.WithConfig(config),
+		client.WithConfig(config),
 		client.WithLogger(logger),
 		client.WithTracer(tracer),
 	)

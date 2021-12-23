@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/opentracing/opentracing-go"
+	"go.adenix.dev/adderall/internal/pointer"
 )
 
 // Option interface to identify functional options
@@ -26,14 +27,31 @@ func WithServerTracer(t opentracing.Tracer) Option {
 // WithServerConfig provides option to provide a server configuration.
 func WithServerConfig(c Config) Option {
 	return func(s *Server) {
-		s.config = c
+		if c.Port != nil {
+			s.config.Port = c.Port
+		}
+		if c.ReadTimeoutMs != nil {
+			s.config.ReadTimeoutMs = c.ReadTimeoutMs
+		}
+		if c.RequestTimeoutSec != nil {
+			s.config.RequestTimeoutSec = c.RequestTimeoutSec
+		}
+		if c.ShutdownDelaySeconds != nil {
+			s.config.ShutdownDelaySeconds = c.ShutdownDelaySeconds
+		}
+		if c.WriteTimeoutMs != nil {
+			s.config.WriteTimeoutMs = c.WriteTimeoutMs
+		}
+		if c.SwaggerFile != nil {
+			s.config.SwaggerFile = c.SwaggerFile
+		}
 	}
 }
 
 // WithServerPort provides option to provide the port on which the server listens. Default is 80
 func WithServerPort(p int) Option {
 	return func(s *Server) {
-		s.config.Port = p
+		s.config.Port = pointer.IntP(p)
 	}
 }
 
@@ -42,7 +60,7 @@ func WithServerPort(p int) Option {
 // defaults to 10 seconds
 func WithServerReadTimeout(t int) Option {
 	return func(s *Server) {
-		s.config.ReadTimeoutMs = t
+		s.config.ReadTimeoutMs = pointer.IntP(t)
 	}
 }
 
@@ -50,7 +68,7 @@ func WithServerReadTimeout(t int) Option {
 // defaults to 10 seconds
 func WithServerWriteTimeout(t int) Option {
 	return func(s *Server) {
-		s.config.WriteTimeoutMs = t
+		s.config.WriteTimeoutMs = pointer.IntP(t)
 	}
 }
 
@@ -58,7 +76,7 @@ func WithServerWriteTimeout(t int) Option {
 // defaults to 5 seconds
 func WithShutdownDelaySeconds(d int) Option {
 	return func(s *Server) {
-		s.config.ShutdownDelaySeconds = d
+		s.config.ShutdownDelaySeconds = pointer.IntP(d)
 	}
 }
 
@@ -86,7 +104,7 @@ func WithReadinessCheck(f func(http.HandlerFunc) http.HandlerFunc) Option {
 // WithSwaggerFile provides option to provide the swagger file location. Default is '/swagger.json'
 func WithSwaggerFile(f string) Option {
 	return func(s *Server) {
-		s.config.SwaggerFile = f
+		s.config.SwaggerFile = pointer.StringP(f)
 	}
 }
 
@@ -117,7 +135,24 @@ func WithTracer(t opentracing.Tracer) FactoryOption {
 // WithConfig provides option to provide a server configuration.
 func WithConfig(c Config) FactoryOption {
 	return func(f *factory) {
-		f.config = c
+		if c.Port != nil {
+			f.config.Port = c.Port
+		}
+		if c.ReadTimeoutMs != nil {
+			f.config.ReadTimeoutMs = c.ReadTimeoutMs
+		}
+		if c.RequestTimeoutSec != nil {
+			f.config.RequestTimeoutSec = c.RequestTimeoutSec
+		}
+		if c.ShutdownDelaySeconds != nil {
+			f.config.ShutdownDelaySeconds = c.ShutdownDelaySeconds
+		}
+		if c.WriteTimeoutMs != nil {
+			f.config.WriteTimeoutMs = c.WriteTimeoutMs
+		}
+		if c.SwaggerFile != nil {
+			f.config.SwaggerFile = c.SwaggerFile
+		}
 	}
 }
 
