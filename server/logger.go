@@ -2,8 +2,6 @@ package server
 
 import (
 	"context"
-
-	"go.adenix.dev/adderall/logger"
 )
 
 type Logger interface {
@@ -13,12 +11,9 @@ type Logger interface {
 	ErrorCtx(ctx context.Context, msg string, keysAndValues ...interface{})
 }
 
-type NoopLogger struct {
-	logger.Logger
-}
+type NoopLogger struct{}
 
 var _ Logger = (*NoopLogger)(nil)
-var _ logger.Logger = (*NoopLogger)(nil)
 
 func (n NoopLogger) DebugCtx(ctx context.Context, msg string, keysAndValues ...interface{})  {}
 func (n NoopLogger) InfoCtx(ctx context.Context, msg string, keysAndValues ...interface{})   {}
