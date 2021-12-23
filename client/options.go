@@ -37,30 +37,43 @@ func WithRetryMax(r int) Option {
 	}
 }
 
-type FactoryOption func(f *factory)
+type FactoryOption interface{ apply(p *factory) }
 
-func WithLogger(l Logger) FactoryOption {
-	return func(f *factory) {
-		f.logger = l
+// WithLogger provides option to provide a logger implementation. Noop is default
+func WithLogger(l Logger) FactoryOptionLogger { return FactoryOptionLogger{logger: l} }
+
+// WithTracer provides option to provide a tracer implementation. Noop is default
+func WithTracer(t opentracing.Tracer) FactoryOptionTracer { return FactoryOptionTracer{tracer: t} }
+
+// WithConfig provides option to provide a server configuration.
+func WithConfig(c Config) FactoryOptionConfig { return FactoryOptionConfig{c} }
+
+type FactoryOptionLogger struct{ logger Logger }
+
+func (l FactoryOptionLogger) apply(f *factory) {
+	if l.logger != nil {
+		f.logger = l.logger
 	}
 }
 
-func WithTracer(t opentracing.Tracer) FactoryOption {
-	return func(f *factory) {
-		f.tracer = t
+type FactoryOptionTracer struct{ tracer opentracing.Tracer }
+
+func (t FactoryOptionTracer) apply(f *factory) {
+	if t.tracer != nil {
+		f.tracer = t.tracer
 	}
 }
 
-func WithConfig(c Config) FactoryOption {
-	return func(f *factory) {
-		if c.TimeoutMs != nil {
-			f.config.TimeoutMs = c.TimeoutMs
-		}
-		if c.RetryWaitMinMs != nil {
-			f.config.RetryWaitMinMs = c.RetryWaitMinMs
-		}
-		if c.RetryMax != nil {
-			f.config.RetryMax = c.RetryMax
-		}
+type FactoryOptionConfig struct{ config Config }
+
+func (c FactoryOptionConfig) apply(f *factory) {
+	if c.config.TimeoutMs != nil {
+		f.config.TimeoutMs = c.config.TimeoutMs
+	}
+	if c.config.RetryWaitMinMs != nil {
+		f.config.RetryWaitMinMs = c.config.RetryWaitMinMs
+	}
+	if c.config.RetryMax != nil {
+		f.config.RetryMax = c.config.RetryMax
 	}
 }

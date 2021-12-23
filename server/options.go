@@ -116,50 +116,64 @@ func WithServerRouter(r Handler) Option {
 }
 
 // FactoryOption interface to identify functional options
-type FactoryOption func(f *factory)
+type FactoryOption interface{ apply(p *factory) }
 
 // WithLogger provides option to provide a logger implementation. Noop is default
-func WithLogger(l Logger) FactoryOption {
-	return func(f *factory) {
-		f.logger = l
-	}
-}
+func WithLogger(l Logger) FactoryOptionLogger { return FactoryOptionLogger{logger: l} }
 
 // WithTracer provides option to provide a tracer implementation. Noop is default
-func WithTracer(t opentracing.Tracer) FactoryOption {
-	return func(f *factory) {
-		f.tracer = t
-	}
-}
+func WithTracer(t opentracing.Tracer) FactoryOptionTracer { return FactoryOptionTracer{tracer: t} }
 
 // WithConfig provides option to provide a server configuration.
-func WithConfig(c Config) FactoryOption {
-	return func(f *factory) {
-		if c.Port != nil {
-			f.config.Port = c.Port
-		}
-		if c.ReadTimeoutMs != nil {
-			f.config.ReadTimeoutMs = c.ReadTimeoutMs
-		}
-		if c.RequestTimeoutSec != nil {
-			f.config.RequestTimeoutSec = c.RequestTimeoutSec
-		}
-		if c.ShutdownDelaySeconds != nil {
-			f.config.ShutdownDelaySeconds = c.ShutdownDelaySeconds
-		}
-		if c.WriteTimeoutMs != nil {
-			f.config.WriteTimeoutMs = c.WriteTimeoutMs
-		}
-		if c.SwaggerFile != nil {
-			f.config.SwaggerFile = c.SwaggerFile
-		}
-	}
-}
+func WithConfig(c Config) FactoryOptionConfig { return FactoryOptionConfig{c} }
 
 // WithRouter provides option to provide a function which returns which router will be used.
 // By default we use http.ServeMux
-func WithRouter(rf func() Handler) FactoryOption {
-	return func(f *factory) {
-		f.routerFunc = rf
+func WithRouter(rf func() Handler) FactoryOptionRouter { return FactoryOptionRouter{rf} }
+
+type FactoryOptionTracer struct{ tracer opentracing.Tracer }
+
+func (t FactoryOptionTracer) apply(f *factory) {
+	if t.tracer != nil {
+		f.tracer = t.tracer
+	}
+}
+
+type FactoryOptionLogger struct{ logger Logger }
+
+func (l FactoryOptionLogger) apply(f *factory) {
+	if l.logger != nil {
+		f.logger = l.logger
+	}
+}
+
+type FactoryOptionConfig struct{ config Config }
+
+func (c FactoryOptionConfig) apply(f *factory) {
+	if c.config.Port != nil {
+		f.config.Port = c.config.Port
+	}
+	if c.config.ReadTimeoutMs != nil {
+		f.config.ReadTimeoutMs = c.config.ReadTimeoutMs
+	}
+	if c.config.RequestTimeoutSec != nil {
+		f.config.RequestTimeoutSec = c.config.RequestTimeoutSec
+	}
+	if c.config.ShutdownDelaySeconds != nil {
+		f.config.ShutdownDelaySeconds = c.config.ShutdownDelaySeconds
+	}
+	if c.config.WriteTimeoutMs != nil {
+		f.config.WriteTimeoutMs = c.config.WriteTimeoutMs
+	}
+	if c.config.SwaggerFile != nil {
+		f.config.SwaggerFile = c.config.SwaggerFile
+	}
+}
+
+type FactoryOptionRouter struct{ rf func() Handler }
+
+func (ro FactoryOptionRouter) apply(f *factory) {
+	if ro.rf != nil {
+		f.routerFunc = ro.rf
 	}
 }

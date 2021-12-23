@@ -5,6 +5,7 @@ package main
 
 import (
 	"github.com/google/wire"
+	"go.adenix.dev/adderall"
 	"go.adenix.dev/adderall/config"
 	"go.adenix.dev/adderall/logger"
 	"go.adenix.dev/adderall/server"
@@ -22,9 +23,10 @@ func InitializeServer() (*server.Server, func()) {
 var commonSet = wire.NewSet(
 	config.NewAppConfig,
 	logger.NewLogger,
-	NewTracer,
-	NewServerConfig,
-	NewServerFactory,
-	NewClientConfig,
-	NewClientFactory,
+	ProvideTracer,
+	ProvideServerConfig,
+	ProvideServerRouter,
+	ProvideClientConfig,
+	adderall.ProvideServerFactorySet,
+	adderall.ProvideClientFactorySet,
 )

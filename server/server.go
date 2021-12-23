@@ -196,6 +196,8 @@ type Handler interface {
 	HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request))
 }
 
+type Router func() Handler
+
 type Config struct {
 	Port                 *int
 	ReadTimeoutMs        *int

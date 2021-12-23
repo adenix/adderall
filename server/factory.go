@@ -28,7 +28,9 @@ func NewFactory(options ...FactoryOption) Factory { //Take params as option
 	}
 
 	for _, option := range options {
-		option(f)
+		if option != nil {
+			option.apply(f)
+		}
 	}
 
 	return f

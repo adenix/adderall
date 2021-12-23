@@ -8,6 +8,7 @@ package main
 
 import (
 	"github.com/google/wire"
+	"go.adenix.dev/adderall"
 	"go.adenix.dev/adderall/config"
 	"go.adenix.dev/adderall/logger"
 	"go.adenix.dev/adderall/server"
@@ -17,12 +18,22 @@ import (
 
 func InitializeServer() (*server.Server, func()) {
 	appConfig := config.NewAppConfig()
-	serverConfig := NewServerConfig(appConfig)
-	tracer := NewTracer()
+	serverConfig := ProvideServerConfig(appConfig)
+	factoryOptionConfig := adderall.ProvideServerFactoryOptionWithConfig(serverConfig)
+	tracer := ProvideTracer()
 	loggerLogger, cleanup := logger.NewLogger(tracer)
-	factory := NewServerFactory(serverConfig, loggerLogger, tracer)
-	clientConfig := NewClientConfig(appConfig)
-	clientFactory := NewClientFactory(clientConfig, loggerLogger, tracer)
+	factoryOptionLogger := adderall.ProvideServerFactoryOptionWithLogger(loggerLogger)
+	factoryOptionTracer := adderall.ProvideServerFactoryOptionWithTracer(tracer)
+	router := ProvideServerRouter()
+	factoryOptionRouter := adderall.ProvideServerFactoryOptionWithRouter(router)
+	v := adderall.ProvideServerFactoryOptions(factoryOptionConfig, factoryOptionLogger, factoryOptionTracer, factoryOptionRouter)
+	factory := adderall.ProvideServerFactory(v)
+	clientConfig := ProvideClientConfig(appConfig)
+	clientFactoryOptionConfig := adderall.ProvideClientFactoryOptionWithConfig(clientConfig)
+	clientFactoryOptionLogger := adderall.ProvideClientFactoryOptionWithLogger(loggerLogger)
+	clientFactoryOptionTracer := adderall.ProvideClientFactoryOptionWithTracer(tracer)
+	v2 := adderall.ProvideClientFactoryOptions(clientFactoryOptionConfig, clientFactoryOptionLogger, clientFactoryOptionTracer)
+	clientFactory := adderall.ProvideClientFactory(v2)
 	myService := MyService{
 		ServerFactory: factory,
 		ClientFactory: clientFactory,
@@ -35,9 +46,8 @@ func InitializeServer() (*server.Server, func()) {
 
 // wire.go:
 
-var commonSet = wire.NewSet(config.NewAppConfig, logger.NewLogger, NewTracer,
-	NewServerConfig,
-	NewServerFactory,
-	NewClientConfig,
-	NewClientFactory,
+var commonSet = wire.NewSet(config.NewAppConfig, logger.NewLogger, ProvideTracer,
+	ProvideServerConfig,
+	ProvideServerRouter,
+	ProvideClientConfig, adderall.ProvideServerFactorySet, adderall.ProvideClientFactorySet,
 )
