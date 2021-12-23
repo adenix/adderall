@@ -9,23 +9,7 @@ import (
 	httptrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/net/http"
 )
 
-type FooServiceConfiguration struct {
-	TimeoutMs      int
-	RetryWaitMinMs int
-	RetryMax       int
-}
-
-func NewFooServiceConfiguration(ac *config.AppConfig) (*FooServiceConfiguration, error) {
-	cfg := &FooServiceConfiguration{}
-	err := ac.Value(cfg)
-	return cfg, err
-}
-
-func NewServerFactory(
-	config server.Config,
-	logger logger.Logger,
-	tracer opentracing.Tracer,
-) server.Factory {
+func NewServerFactory(config server.Config, logger logger.Logger, tracer opentracing.Tracer) server.Factory {
 	return server.NewFactory(
 		server.WithLogger(logger),
 		server.WithRouter(func() server.Handler {

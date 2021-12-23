@@ -14,35 +14,6 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
-// Factory interface to create a server.
-type Factory interface {
-	Create(options ...Option) *Server
-}
-type factory struct {
-	tracer     opentracing.Tracer
-	logger     Logger
-	config     Config
-	routerFunc func() Handler
-}
-
-// NewFactory instantiates a new server Factory
-func NewFactory(options ...FactoryOption) Factory { //Take params as option
-	f := &factory{
-		tracer:     opentracing.NoopTracer{},
-		logger:     NoopLogger{},
-		config:     defaultConfig(),
-		routerFunc: func() Handler { return &http.ServeMux{} },
-	}
-
-	for _, option := range options {
-		if option != nil {
-			option.apply(f)
-		}
-	}
-
-	return f
-}
-
 // Server represents a http server
 type Server struct {
 	Router         Handler
@@ -52,30 +23,6 @@ type Server struct {
 	livenessCheck  func(http.HandlerFunc) http.HandlerFunc
 	readinessCheck func(http.HandlerFunc) http.HandlerFunc
 	healthCheck    func(http.HandlerFunc) http.HandlerFunc
-}
-
-func (f *factory) Create(options ...Option) *Server {
-
-	srvr := &Server{
-		tracer: f.tracer,
-		logger: f.logger,
-		config: f.config,
-		Router: f.routerFunc(),
-	}
-
-	for _, option := range options {
-		if option != nil {
-			option.apply(srvr)
-		}
-	}
-
-	srvr.Router.HandleFunc("/live", srvr.getLivenessHandler())
-	srvr.Router.HandleFunc("/ready", srvr.getReadinessHandler())
-	srvr.Router.HandleFunc("/health", srvr.getHealthCheckHandler())
-
-	srvr.addSwagger(srvr.Router)
-
-	return srvr
 }
 
 // Serve sets up a http server and starts listening
