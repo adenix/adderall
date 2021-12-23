@@ -8,7 +8,6 @@ package main
 
 import (
 	"github.com/google/wire"
-	"go.adenix.dev/adderall/client"
 	"go.adenix.dev/adderall/config"
 	"go.adenix.dev/adderall/logger"
 	"go.adenix.dev/adderall/server"
@@ -22,13 +21,11 @@ func InitializeServer() (*server.Server, func()) {
 	tracer := NewTracer()
 	loggerLogger, cleanup := logger.NewLogger(tracer)
 	factory := NewServerFactory(serverConfig, loggerLogger, tracer)
-	clientConfig := NewHttpServiceConfig(appConfig)
-	leveledLogger := client.NewLeveledLogger(loggerLogger)
-	provider := client.NewClientProvider(tracer, leveledLogger)
+	clientConfig := NewClientConfig(appConfig)
+	clientFactory := NewClientFactory(clientConfig, loggerLogger, tracer)
 	myService := MyService{
-		ServerFactory:      factory,
-		HTTPConfig:         clientConfig,
-		HTTPClientProvider: provider,
+		ServerFactory: factory,
+		ClientFactory: clientFactory,
 	}
 	serverServer := NewServer(myService)
 	return serverServer, func() {
@@ -38,8 +35,9 @@ func InitializeServer() (*server.Server, func()) {
 
 // wire.go:
 
-var commonSet = wire.NewSet(
+var commonSet = wire.NewSet(config.NewAppConfig, logger.NewLogger, NewTracer,
 	NewServerConfig,
-	NewServerFactory, config.NewAppConfig, logger.NewLogger, NewTracer,
-	NewHttpServiceConfig, client.NewClientProvider, wire.Bind(new(client.Logger), new(logger.Logger)), client.NewLeveledLogger,
+	NewServerFactory,
+	NewClientConfig,
+	NewClientFactory,
 )

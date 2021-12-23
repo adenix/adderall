@@ -10,6 +10,7 @@ import (
 type Factory interface {
 	Create(options ...Option) *Server
 }
+
 type factory struct {
 	tracer     opentracing.Tracer
 	logger     Logger
@@ -27,9 +28,7 @@ func NewFactory(options ...FactoryOption) Factory { //Take params as option
 	}
 
 	for _, option := range options {
-		if option != nil {
-			option(f)
-		}
+		option(f)
 	}
 
 	return f
@@ -37,7 +36,7 @@ func NewFactory(options ...FactoryOption) Factory { //Take params as option
 
 func (f *factory) Create(options ...Option) *Server {
 
-	srvr := &Server{
+	s := &Server{
 		tracer: f.tracer,
 		logger: f.logger,
 		config: f.config,
@@ -45,16 +44,14 @@ func (f *factory) Create(options ...Option) *Server {
 	}
 
 	for _, option := range options {
-		if option != nil {
-			option(srvr)
-		}
+		option(s)
 	}
 
-	srvr.Router.HandleFunc("/live", srvr.getLivenessHandler())
-	srvr.Router.HandleFunc("/ready", srvr.getReadinessHandler())
-	srvr.Router.HandleFunc("/health", srvr.getHealthCheckHandler())
+	s.Router.HandleFunc("/live", s.getLivenessHandler())
+	s.Router.HandleFunc("/ready", s.getReadinessHandler())
+	s.Router.HandleFunc("/health", s.getHealthCheckHandler())
 
-	srvr.addSwagger(srvr.Router)
+	s.addSwagger(s.Router)
 
-	return srvr
+	return s
 }

@@ -8,6 +8,7 @@ import (
 func main() {
 	server, cleanup := InitializeServer()
 	defer cleanup()
+
 	if err := server.Serve(context.Background()); err != nil {
 		log.Panic(err)
 	}

@@ -6,36 +6,32 @@ import (
 	"github.com/hashicorp/go-retryablehttp"
 )
 
-// Logger conforms to our.Logger interface
+var _ Logger = NoopLogger{}
+
 type Logger interface {
-	Debug(ctx context.Context, msg string, keysAndValues ...interface{})
-	Info(ctx context.Context, msg string, keysAndValues ...interface{})
-	Warn(ctx context.Context, msg string, keysAndValues ...interface{})
-	Error(ctx context.Context, msg string, keysAndValues ...interface{})
+	Debug(msg string, keysAndValues ...interface{})
+	Info(msg string, keysAndValues ...interface{})
+	Warn(msg string, keysAndValues ...interface{})
+	Error(msg string, keysAndValues ...interface{})
+
+	DebugCtx(ctx context.Context, msg string, keysAndValues ...interface{})
+	InfoCtx(ctx context.Context, msg string, keysAndValues ...interface{})
+	WarnCtx(ctx context.Context, msg string, keysAndValues ...interface{})
+	ErrorCtx(ctx context.Context, msg string, keysAndValues ...interface{})
 }
 
-// LeveledLogger conforms to retryablehttp.LeveledLogger interface.
-// This has no context support, so all log messages are logged without contextual information.
-// application scoped log fields will still be added.
-type LeveledLogger struct {
-	logger Logger
-}
+type NoopLogger struct{}
 
-var _ retryablehttp.LeveledLogger = LeveledLogger{}
+var _ retryablehttp.LeveledLogger = NoopLogger{}
 
-func NewLeveledLogger(l Logger) LeveledLogger {
-	return LeveledLogger{l}
-}
+func (n NoopLogger) Debug(msg string, keysAndValues ...interface{})  {}
+func (n NoopLogger) Info(msg string, keysAndValues ...interface{})   {}
+func (n NoopLogger) Warn(msg string, keysAndValues ...interface{})   {}
+func (n NoopLogger) Error(msg string, keysAndValues ...interface{})  {}
+func (n NoopLogger) DPanic(msg string, keysAndValues ...interface{}) {}
 
-func (l LeveledLogger) Debug(msg string, keysAndValues ...interface{}) {
-	l.logger.Debug(context.Background(), msg, keysAndValues...)
-}
-func (l LeveledLogger) Info(msg string, keysAndValues ...interface{}) {
-	l.logger.Info(context.Background(), msg, keysAndValues...)
-}
-func (l LeveledLogger) Warn(msg string, keysAndValues ...interface{}) {
-	l.logger.Warn(context.Background(), msg, keysAndValues...)
-}
-func (l LeveledLogger) Error(msg string, keysAndValues ...interface{}) {
-	l.logger.Error(context.Background(), msg, keysAndValues...)
-}
+func (n NoopLogger) DebugCtx(ctx context.Context, msg string, keysAndValues ...interface{})  {}
+func (n NoopLogger) InfoCtx(ctx context.Context, msg string, keysAndValues ...interface{})   {}
+func (n NoopLogger) WarnCtx(ctx context.Context, msg string, keysAndValues ...interface{})   {}
+func (n NoopLogger) ErrorCtx(ctx context.Context, msg string, keysAndValues ...interface{})  {}
+func (n NoopLogger) DPanicCtx(ctx context.Context, msg string, keysAndValues ...interface{}) {}

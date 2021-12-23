@@ -10,10 +10,16 @@ import (
 )
 
 type Logger interface {
-	Debug(ctx context.Context, msg string, keysAndValues ...interface{})
-	Info(ctx context.Context, msg string, keysAndValues ...interface{})
-	Warn(ctx context.Context, msg string, keysAndValues ...interface{})
-	Error(ctx context.Context, msg string, keysAndValues ...interface{})
+	Debug(msg string, keysAndValues ...interface{})
+	Info(msg string, keysAndValues ...interface{})
+	Warn(msg string, keysAndValues ...interface{})
+	Error(msg string, keysAndValues ...interface{})
+
+	DebugCtx(ctx context.Context, msg string, keysAndValues ...interface{})
+	InfoCtx(ctx context.Context, msg string, keysAndValues ...interface{})
+	WarnCtx(ctx context.Context, msg string, keysAndValues ...interface{})
+	ErrorCtx(ctx context.Context, msg string, keysAndValues ...interface{})
+
 	Sync()
 }
 
@@ -47,22 +53,42 @@ func NewLogger(t opentracing.Tracer) (Logger, func()) {
 	return logger, func() { _ = zapLogger.Sync() }
 }
 
-func (d *DefaultLogger) Debug(ctx context.Context, msg string, keysAndValues ...interface{}) {
+func (d *DefaultLogger) Debug(msg string, keysAndValues ...interface{}) {
+	l := d.getScopedLogger(context.Background())
+	l.Debugw(msg, keysAndValues...)
+}
+
+func (d *DefaultLogger) Info(msg string, keysAndValues ...interface{}) {
+	l := d.getScopedLogger(context.Background())
+	l.Infow(msg, keysAndValues...)
+}
+
+func (d *DefaultLogger) Warn(msg string, keysAndValues ...interface{}) {
+	l := d.getScopedLogger(context.Background())
+	l.Warnw(msg, keysAndValues...)
+}
+
+func (d *DefaultLogger) Error(msg string, keysAndValues ...interface{}) {
+	l := d.getScopedLogger(context.Background())
+	l.Errorw(msg, keysAndValues...)
+}
+
+func (d *DefaultLogger) DebugCtx(ctx context.Context, msg string, keysAndValues ...interface{}) {
 	l := d.getScopedLogger(ctx)
 	l.Debugw(msg, keysAndValues...)
 }
 
-func (d *DefaultLogger) Info(ctx context.Context, msg string, keysAndValues ...interface{}) {
+func (d *DefaultLogger) InfoCtx(ctx context.Context, msg string, keysAndValues ...interface{}) {
 	l := d.getScopedLogger(ctx)
 	l.Infow(msg, keysAndValues...)
 }
 
-func (d *DefaultLogger) Warn(ctx context.Context, msg string, keysAndValues ...interface{}) {
+func (d *DefaultLogger) WarnCtx(ctx context.Context, msg string, keysAndValues ...interface{}) {
 	l := d.getScopedLogger(ctx)
 	l.Warnw(msg, keysAndValues...)
 }
 
-func (d *DefaultLogger) Error(ctx context.Context, msg string, keysAndValues ...interface{}) {
+func (d *DefaultLogger) ErrorCtx(ctx context.Context, msg string, keysAndValues ...interface{}) {
 	l := d.getScopedLogger(ctx)
 	l.Errorw(msg, keysAndValues...)
 }

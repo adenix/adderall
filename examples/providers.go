@@ -11,17 +11,27 @@ import (
 
 func NewServerFactory(config server.Config, logger logger.Logger, tracer opentracing.Tracer) server.Factory {
 	return server.NewFactory(
+		// server.WithConfig(config),
 		server.WithLogger(logger),
+		server.WithTracer(tracer),
 		server.WithRouter(func() server.Handler {
 			return httptrace.NewServeMux()
 		}))
+}
+
+func NewClientFactory(config client.Config, logger logger.Logger, tracer opentracing.Tracer) client.Factory {
+	return client.NewFactory(
+		// client.WithConfig(config),
+		client.WithLogger(logger),
+		client.WithTracer(tracer),
+	)
 }
 
 func NewServerConfig(ac *config.AppConfig) server.Config {
 	return server.Config{}
 }
 
-func NewHttpServiceConfig(ac *config.AppConfig) client.Config {
+func NewClientConfig(ac *config.AppConfig) client.Config {
 	return client.Config{}
 }
 

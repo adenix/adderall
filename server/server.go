@@ -43,14 +43,14 @@ func (s *Server) Serve(ctx context.Context) error { //Take serve options
 	errs := make(chan error)
 	go func() {
 		if err := srvr.ListenAndServe(); err != http.ErrServerClosed {
-			s.logger.Error(ctx, "server failed to start up", "error", err)
+			s.logger.ErrorCtx(ctx, "server failed to start up", "error", err)
 			errs <- err
 		} else {
 			errs <- nil
 		}
 	}()
 
-	s.logger.Info(ctx, "server started successfully", "port", port)
+	s.logger.InfoCtx(ctx, "server started successfully", "port", port)
 
 	go func() {
 		errs <- s.gracefulShutdown(ctx, &srvr)
@@ -67,7 +67,7 @@ func (s *Server) addSwagger(r Handler) {
 
 	if _, err := os.Stat(swaggerFileLocation); err != nil {
 		//There is no request specific context here, so background context is ok.
-		s.logger.Info(context.Background(), "swagger not added", "location", swaggerFileLocation, "error", err)
+		s.logger.InfoCtx(context.Background(), "swagger not added", "location", swaggerFileLocation, "error", err)
 		return
 	}
 
@@ -99,7 +99,7 @@ func (s *Server) profilingMiddleware() func(http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
 			next.ServeHTTP(w, r)
-			s.logger.Debug(r.Context(), "http path response time",
+			s.logger.DebugCtx(r.Context(), "http path response time",
 				"path", r.URL.EscapedPath(),
 				"method", r.Method,
 				"time", time.Since(start),
@@ -137,7 +137,7 @@ func (s *Server) gracefulShutdown(ctx context.Context, server *http.Server) erro
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 	sig := <-quit
-	s.logger.Info(ctx, "signal received", "signal", sig)
+	s.logger.InfoCtx(ctx, "signal received", "signal", sig)
 
 	timeout := time.Duration(s.config.ShutdownDelaySeconds) * time.Second
 
@@ -145,13 +145,13 @@ func (s *Server) gracefulShutdown(ctx context.Context, server *http.Server) erro
 	defer cancel()
 	if err := server.Shutdown(ctx); err != nil {
 
-		s.logger.Error(
+		s.logger.ErrorCtx(
 			ctx,
 			"Error while gracefully shutting down server, forcing shutdown because of error",
 			"err", err)
 		return err
 	}
-	s.logger.Info(ctx, "server exited successfully")
+	s.logger.InfoCtx(ctx, "server exited successfully")
 	return nil
 }
 
