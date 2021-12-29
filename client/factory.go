@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/opentracing/opentracing-go"
+	"go.adenix.dev/adderall/internal/pointer"
 )
 
 type Factory interface {
@@ -65,4 +66,18 @@ func (f *factory) Create(options ...Option) *Client {
 	}
 
 	return c
+}
+
+type Config struct {
+	TimeoutMs      *int
+	RetryWaitMinMs *int
+	RetryMax       *int
+}
+
+func defaultConfig() Config {
+	return Config{
+		TimeoutMs:      pointer.IntP(3000),
+		RetryWaitMinMs: pointer.IntP(3000),
+		RetryMax:       pointer.IntP(5),
+	}
 }

@@ -5,7 +5,6 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
-	"go.adenix.dev/adderall/internal/pointer"
 )
 
 type Client struct {
@@ -36,18 +35,4 @@ func (c *Client) Do(request *http.Request) (*http.Response, error) {
 	ext.HTTPStatusCode.Set(span, uint16(resp.StatusCode))
 
 	return resp, err
-}
-
-type Config struct {
-	TimeoutMs      *int
-	RetryWaitMinMs *int
-	RetryMax       *int
-}
-
-func defaultConfig() Config {
-	return Config{
-		TimeoutMs:      pointer.IntP(3000),
-		RetryWaitMinMs: pointer.IntP(3000),
-		RetryMax:       pointer.IntP(5),
-	}
 }

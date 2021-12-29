@@ -54,23 +54,19 @@ func NewLogger(t opentracing.Tracer) (Logger, func()) {
 }
 
 func (d *DefaultLogger) Debug(msg string, keysAndValues ...interface{}) {
-	l := d.getScopedLogger(context.Background())
-	l.Debugw(msg, keysAndValues...)
+	d.DebugCtx(context.Background(), msg, keysAndValues)
 }
 
 func (d *DefaultLogger) Info(msg string, keysAndValues ...interface{}) {
-	l := d.getScopedLogger(context.Background())
-	l.Infow(msg, keysAndValues...)
+	d.InfoCtx(context.Background(), msg, keysAndValues)
 }
 
 func (d *DefaultLogger) Warn(msg string, keysAndValues ...interface{}) {
-	l := d.getScopedLogger(context.Background())
-	l.Warnw(msg, keysAndValues...)
+	d.WarnCtx(context.Background(), msg, keysAndValues)
 }
 
 func (d *DefaultLogger) Error(msg string, keysAndValues ...interface{}) {
-	l := d.getScopedLogger(context.Background())
-	l.Errorw(msg, keysAndValues...)
+	d.ErrorCtx(context.Background(), msg, keysAndValues)
 }
 
 func (d *DefaultLogger) DebugCtx(ctx context.Context, msg string, keysAndValues ...interface{}) {

@@ -19,7 +19,7 @@ type factory struct {
 }
 
 // NewFactory instantiates a new server Factory
-func NewFactory(options ...FactoryOption) Factory { //Take params as option
+func NewFactory(options ...FactoryOption) Factory {
 	f := &factory{
 		tracer:     opentracing.NoopTracer{},
 		logger:     NoopLogger{},
