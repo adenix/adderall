@@ -2,7 +2,6 @@ package logger
 
 import (
 	"context"
-	"os"
 
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
@@ -28,7 +27,7 @@ type DefaultLogger struct {
 	tracer opentracing.Tracer
 }
 
-func NewLogger(t opentracing.Tracer) (Logger, func()) {
+func NewLogger(t opentracing.Tracer, opts ...Option) (Logger, func()) {
 
 	c := zap.NewProductionConfig()
 
@@ -41,10 +40,9 @@ func NewLogger(t opentracing.Tracer) (Logger, func()) {
 		c.InitialFields = make(map[string]interface{})
 	}
 
-	if host, err := os.Hostname(); err == nil {
-		c.InitialFields["host"] = host
+	for _, opt := range opts {
+		opt(&c)
 	}
-	c.InitialFields["pid"] = int64(os.Getpid())
 
 	zapLogger, _ := c.Build(zap.AddCallerSkip(1))
 
