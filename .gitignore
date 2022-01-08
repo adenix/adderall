@@ -5,23 +5,6 @@ example/
 # Created by https://www.toptal.com/developers/gitignore/api/go,goland,visualstudiocode,vim,cmake,macos,windows,linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=go,goland,visualstudiocode,vim,cmake,macos,windows,linux
 
-### CMake ###
-CMakeLists.txt.user
-CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Testing
-Makefile
-cmake_install.cmake
-install_manifest.txt
-compile_commands.json
-CTestTestfile.cmake
-_deps
-
-### CMake Patch ###
-# External projects
-*-prefix/
-
 ### Go ###
 # Binaries for programs and plugins
 *.exe
