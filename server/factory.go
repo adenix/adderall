@@ -6,7 +6,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 )
 
-// Factory interface to create a server.
+// Factory is the interface to create Servers
 type Factory interface {
 	Create(options ...Option) *Server
 }
@@ -18,8 +18,11 @@ type factory struct {
 	routerFunc func() Handler
 }
 
-// NewFactory instantiates a new server Factory
-func NewFactory(options ...FactoryOption) Factory {
+var _ Factory = (*factory)(nil)
+
+// NewFactory instantiates a Server Factory. FactoryOption can be passed to
+// overwrite default configurations.
+func NewFactory(opts ...FactoryOption) Factory {
 	f := &factory{
 		tracer:     opentracing.NoopTracer{},
 		logger:     NoopLogger{},
@@ -27,7 +30,7 @@ func NewFactory(options ...FactoryOption) Factory {
 		routerFunc: func() Handler { return &http.ServeMux{} },
 	}
 
-	for _, option := range options {
+	for _, option := range opts {
 		if option != nil {
 			option.apply(f)
 		}
@@ -36,7 +39,9 @@ func NewFactory(options ...FactoryOption) Factory {
 	return f
 }
 
-func (f *factory) Create(options ...Option) *Server {
+// Create instantiates a Server. Factory configurations are passed to the
+// Server but can be overwritten with passed in Options
+func (f *factory) Create(opts ...Option) *Server {
 
 	s := &Server{
 		tracer: f.tracer,
@@ -45,7 +50,7 @@ func (f *factory) Create(options ...Option) *Server {
 		Router: f.routerFunc(),
 	}
 
-	for _, option := range options {
+	for _, option := range opts {
 		option(s)
 	}
 

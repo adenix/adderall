@@ -5,9 +5,9 @@ import (
 
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/opentracing/opentracing-go"
-	"go.adenix.dev/adderall/internal/pointer"
 )
 
+// Factory is the interface to create Clients
 type Factory interface {
 	Create(options ...Option) *Client
 }
@@ -18,6 +18,8 @@ type factory struct {
 	config Config
 }
 
+// NewFactory instantiates a Client Factory. FactoryOption can be passed to
+// overwrite default configurations.
 func NewFactory(options ...FactoryOption) Factory {
 	f := &factory{
 		tracer: opentracing.NoopTracer{},
@@ -34,6 +36,8 @@ func NewFactory(options ...FactoryOption) Factory {
 	return f
 }
 
+// Create instantiates a Client. Factory configurations are passed to the
+// Client but can be overwritten with passed in Options
 func (f *factory) Create(options ...Option) *Client {
 
 	c := &Client{
@@ -66,18 +70,4 @@ func (f *factory) Create(options ...Option) *Client {
 	}
 
 	return c
-}
-
-type Config struct {
-	TimeoutMs      *int
-	RetryWaitMinMs *int
-	RetryMax       *int
-}
-
-func defaultConfig() Config {
-	return Config{
-		TimeoutMs:      pointer.IntP(3000),
-		RetryWaitMinMs: pointer.IntP(3000),
-		RetryMax:       pointer.IntP(5),
-	}
 }

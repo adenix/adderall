@@ -9,16 +9,18 @@ import (
 	"github.com/miracl/conflate"
 )
 
+// AppConfig ...
 type AppConfig struct {
 	data map[string]json.RawMessage
 }
 
+// NewAppConfig ...
 func NewAppConfig() *AppConfig {
 	merge := conflate.New()
-	merge.AddFiles("config.json")
+	_ = merge.AddFiles("config.json")
 
 	for _, env := range os.Environ() {
-		merge.AddGo(env)
+		_ = merge.AddGo(env)
 	}
 
 	merged, _ := merge.MarshalJSON()
@@ -28,6 +30,7 @@ func NewAppConfig() *AppConfig {
 	return &AppConfig{data}
 }
 
+// Value ...
 func (cfg *AppConfig) Value(conf interface{}) error {
 	if reflect.TypeOf(conf).Kind() != reflect.Ptr {
 		return errors.New("config is not a pointer type")

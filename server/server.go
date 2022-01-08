@@ -15,7 +15,8 @@ import (
 	"go.adenix.dev/adderall/internal/pointer"
 )
 
-// Server represents a http server
+// Server represents a HTTP server. Server is instrumented with OpenTracing,
+// logging, monitoring endpoints, and optionally an OpenAPI v2 endpoint.
 type Server struct {
 	Router         Handler
 	tracer         opentracing.Tracer
@@ -26,8 +27,8 @@ type Server struct {
 	healthCheck    func(http.HandlerFunc) http.HandlerFunc
 }
 
-// Serve sets up a http server and starts listening
-func (s *Server) Serve(ctx context.Context) error { //Take serve options
+// Serve sets up a http server and begins listening
+func (s *Server) Serve(ctx context.Context) error {
 	handler := s.getHandler(ctx)
 	port := s.config.Port
 	if port == nil || *port < 1 {
@@ -60,6 +61,7 @@ func (s *Server) Serve(ctx context.Context) error { //Take serve options
 	return <-errs
 }
 
+// addSwagger configures and adds handers for an OpenAPI file and the Swagger UI
 func (s *Server) addSwagger(r Handler) {
 	swaggerFileLocation := "/swagger.json"
 	if s.config.SwaggerFile != nil && len(*s.config.SwaggerFile) > 0 {
@@ -67,17 +69,14 @@ func (s *Server) addSwagger(r Handler) {
 	}
 
 	if _, err := os.Stat(swaggerFileLocation); err != nil {
-		//There is no request specific context here, so background context is ok.
 		s.logger.InfoCtx(context.Background(), "swagger not added", "location", swaggerFileLocation, "error", err)
 		return
 	}
 
-	// serve the actual swagger json file
 	r.HandleFunc(swaggerFileLocation, func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, swaggerFileLocation)
 	})
 
-	// serve swagger ui on /, /swagger, and /swagger/
 	swaggerUIHandler := httpSwagger.Handler(
 		httpSwagger.URL(swaggerFileLocation),
 	)
@@ -89,7 +88,7 @@ func (s *Server) addSwagger(r Handler) {
 	r.HandleFunc("/swagger/*", swaggerUIHandler)
 }
 
-// ServeHTTP ... This is used to satisfy http.Handler interface, primarily to pass to test recorder.
+// ServeHTTP is used to satisfy http.Handler interface, primarily to pass to test recorder.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.getHandler(context.Background()).ServeHTTP(w, r)
 }
@@ -129,7 +128,6 @@ func (s *Server) getHandler(ctx context.Context) http.Handler {
 	h = s.timeoutMiddleware()(h)
 	h = s.tracingMiddleware()(h)
 	h = s.profilingMiddleware()(h)
-	//Add other global middlerware here
 	return h
 }
 
@@ -140,15 +138,18 @@ func (s *Server) gracefulShutdown(ctx context.Context, server *http.Server) erro
 	sig := <-quit
 	s.logger.InfoCtx(ctx, "signal received", "signal", sig)
 
-	timeout := time.Duration(*s.config.ShutdownDelaySeconds) * time.Second
+	shutdownDelaySeconds := s.config.ShutdownDelaySeconds
+	if shutdownDelaySeconds == nil || *shutdownDelaySeconds < 1 {
+		shutdownDelaySeconds = pointer.IntP(5)
+	}
+	timeout := time.Duration(*shutdownDelaySeconds) * time.Second
 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	if err := server.Shutdown(ctx); err != nil {
-
 		s.logger.ErrorCtx(
 			ctx,
-			"Error while gracefully shutting down server, forcing shutdown because of error",
+			"error while gracefully shutting down server, forcing shutdown because of error",
 			"err", err)
 		return err
 	}
@@ -182,7 +183,7 @@ func (s *Server) getHealthCheckHandler() http.HandlerFunc {
 
 	defult := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK!"))
+		_, _ = w.Write([]byte("OK!"))
 	})
 
 	if s.healthCheck != nil {
@@ -191,13 +192,16 @@ func (s *Server) getHealthCheckHandler() http.HandlerFunc {
 	return defult
 }
 
+// Handler is the interface to handle HTTP requests
 type Handler interface {
 	http.Handler
 	HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request))
 }
 
+// Router configures and provides a Handler
 type Router func() Handler
 
+// Config contains options for a Server
 type Config struct {
 	Port                 *int
 	ReadTimeoutMs        *int
@@ -207,6 +211,7 @@ type Config struct {
 	SwaggerFile          *string
 }
 
+// defaultConfig provides a Config initalized with default values
 func defaultConfig() Config {
 	return Config{
 		Port:                 pointer.IntP(8080),

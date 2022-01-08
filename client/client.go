@@ -5,8 +5,10 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
+	"go.adenix.dev/adderall/internal/pointer"
 )
 
+// Client represents a Doer. Client is instrumented with OpenTracing and logging
 type Client struct {
 	*http.Client
 	tracer opentracing.Tracer
@@ -14,6 +16,7 @@ type Client struct {
 	config Config
 }
 
+// Do executes an OpenTracking instrumented HTTP request
 func (c *Client) Do(request *http.Request) (*http.Response, error) {
 	ctx := request.Context()
 
@@ -23,7 +26,7 @@ func (c *Client) Do(request *http.Request) (*http.Response, error) {
 	ext.HTTPMethod.Set(span, request.Method)
 	ext.HTTPUrl.Set(span, request.URL.String())
 
-	c.tracer.Inject(span.Context(), opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(request.Header))
+	_ = c.tracer.Inject(span.Context(), opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(request.Header))
 
 	request = request.WithContext(ctx)
 
@@ -35,4 +38,20 @@ func (c *Client) Do(request *http.Request) (*http.Response, error) {
 	ext.HTTPStatusCode.Set(span, uint16(resp.StatusCode))
 
 	return resp, err
+}
+
+// Config contains options for a Client
+type Config struct {
+	TimeoutMs      *int
+	RetryWaitMinMs *int
+	RetryMax       *int
+}
+
+// defaultConfig provides a Config initalized with default values
+func defaultConfig() Config {
+	return Config{
+		TimeoutMs:      pointer.IntP(3000),
+		RetryWaitMinMs: pointer.IntP(3000),
+		RetryMax:       pointer.IntP(5),
+	}
 }
