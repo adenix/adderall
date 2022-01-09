@@ -23,3 +23,8 @@ func TestNoopLogger(t *testing.T) {
 		})
 	}
 }
+
+// testLogger is used in tests that use reflection to check the type
+type testLogger struct {
+	Logger
+}

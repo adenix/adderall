@@ -1,8 +1,8 @@
 package adderall
 
 import (
-	"go.adenix.dev/adderall/client"
-	"go.adenix.dev/adderall/server"
+	"go.adenix.dev/adderall/capsules/client"
+	"go.adenix.dev/adderall/capsules/server"
 )
 
 // NewServerFactory provides a server.Factory given a slice of

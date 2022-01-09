@@ -20,7 +20,7 @@ clean-cover:
 
 .PHONY: clean-mock
 clean-mock:
-	@rm -rf internal/mock
+	@rm -rf capsules/**/mock.go
 
 .PHONY: clean
 clean: clean-test clean-cover clean-mock
