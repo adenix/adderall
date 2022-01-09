@@ -3,6 +3,7 @@ module go.adenix.dev/adderall
 go 1.17
 
 require (
+	github.com/golang/mock v1.1.1
 	github.com/google/wire v0.5.0
 	github.com/hashicorp/go-retryablehttp v0.7.0
 	github.com/kisielk/errcheck v1.6.0
