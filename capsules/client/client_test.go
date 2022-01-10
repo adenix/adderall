@@ -115,12 +115,14 @@ func TestDo(t *testing.T) {
 			ts := httptest.NewServer(test.handler)
 			defer ts.Close()
 
-			tracer := mockTrackerWithExpect(t, ctx, test.method, ts.URL, test.status, test.err)
+			tracer := mockTrackerWithExpect(ctx, t, test.method, ts.URL, test.status, test.err)
 			c := NewFactory(WithTracer(tracer)).Create()
 
 			actual, err := test.action(c, ts.URL, "text/plain", test.body)
 			if err == nil {
-				defer actual.Body.Close()
+				defer func() {
+					_ = actual.Body.Close()
+				}()
 				if test.err {
 					t.Error("error expected")
 				}
@@ -135,7 +137,7 @@ func TestDo(t *testing.T) {
 	}
 }
 
-func mockTrackerWithExpect(t *testing.T, ctx context.Context, method, url string, status int, err bool) opentracing.Tracer {
+func mockTrackerWithExpect(ctx context.Context, t *testing.T, method, url string, status int, err bool) opentracing.Tracer {
 	controller := gomock.NewController(t)
 	tracer := mock.NewMockTracer(controller)
 	span := mock.NewMockSpan(controller)
@@ -164,7 +166,7 @@ func mockTrackerWithExpect(t *testing.T, ctx context.Context, method, url string
 func newHandlerFunc(response string, status int) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		rw.WriteHeader(status)
-		fmt.Fprint(rw, response)
+		_, _ = fmt.Fprint(rw, response)
 	}
 }
 

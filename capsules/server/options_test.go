@@ -227,7 +227,7 @@ func TestFactoryOption(t *testing.T) {
 func newHandlerFunc(response string) func(http.HandlerFunc) http.HandlerFunc {
 	return func(h http.HandlerFunc) http.HandlerFunc {
 		return func(rw http.ResponseWriter, r *http.Request) {
-			fmt.Fprint(rw, response)
+			_, _ = fmt.Fprint(rw, response)
 		}
 	}
 }
@@ -331,7 +331,9 @@ func assertOptionHandlerFunc(handler func(http.HandlerFunc) http.HandlerFunc, ex
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
 		}
-		defer res.Body.Close()
+		defer func() {
+			_ = res.Body.Close()
+		}()
 
 		bytes, err := io.ReadAll(res.Body)
 		if err != nil {

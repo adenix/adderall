@@ -10,6 +10,10 @@ PKG_LIST := $(shell go list ${PKG}/... 		\
 list:
 	@for i in ${PKG_LIST}; do echo $$i; done
 
+.PHONY: generate
+generate:
+	@go generate
+
 .PHONY: clean-test
 clean-test:
 	@rm -rf test
@@ -27,57 +31,55 @@ clean: clean-test clean-cover clean-mock
 
 .PHONY: fmt
 fmt:
-	go fmt ${PKG_LIST}
+	@go fmt ${PKG_LIST}
 
 .PHONY: vet
-vet:
-	go vet ${PKG_LIST}
+vet: generate
+	@go vet ${PKG_LIST}
 
 .PHONY: golint
 golint:
-	go run golang.org/x/lint/golint ${PKG_LIST}
+	@go run golang.org/x/lint/golint ${PKG_LIST}
 
 .PHONY: staticcheck
-staticcheck:
-	go run honnef.co/go/tools/cmd/staticcheck ${PKG_LIST}
+staticcheck: generate
+	@go run honnef.co/go/tools/cmd/staticcheck ${PKG_LIST}
 
 .PHONY: errcheck
-errcheck:
-	go run github.com/kisielk/errcheck ${PKG_LIST}
+errcheck: generate
+	@go run github.com/kisielk/errcheck ${PKG_LIST}
 
 .PHONY: lint
-lint: fmt vet golint staticcheck 
+lint: fmt vet golint staticcheck errcheck
 
 .PHONY: test
-test: clean-test clean-mock
-	go generate
-	go test -cover ${PKG_LIST}
+test: clean-test clean-mock generate
+	@go test -cover ${PKG_LIST}
 
 .PHONY: test-report
-test-report: clean-test clean-mock
+test-report: clean-test clean-mock generate
 	@mkdir -p test
-	go generate
-	go run gotest.tools/gotestsum --junitfile test/report.xml --format testname
+	@go run gotest.tools/gotestsum --junitfile test/report.xml --format testname
 
 .PHONY: cover
-cover: clean-cover
+cover: clean-cover clean-mock generate
 	@mkdir -p cover
 	@echo 'mode: count' > cover/coverage.out
 	@echo ${PKG_LIST} | xargs -n1 -I{} sh -c 'go test -covermode=count -coverprofile=cover/coverage.tmp {} && tail -n +2 cover/coverage.tmp >> cover/coverage.out' && rm cover/coverage.tmp
-	go tool cover -func=cover/coverage.out
+	@go tool cover -func=cover/coverage.out
 
 .PHONY: cover-report
 cover-report: cover ## Generate global code coverage report in cobertura
-	go run github.com/boumenot/gocover-cobertura < cover/coverage.out > cover/report.xml
+	@go run github.com/boumenot/gocover-cobertura < cover/coverage.out > cover/report.xml
 
 .PHONY: cover-html
 cover-html: cover ## Generate global code coverage report in HTML
-	go tool cover -html=cover/coverage.out
+	@go tool cover -html=cover/coverage.out
 
 .PHONY: race
 race:
-	go test -race -short ${PKG_LIST}
+	@go test -race -short ${PKG_LIST}
 
 .PHONY: msan
 msan:
-	go test -msan -short ${PKG_LIST}
+	@go test -msan -short ${PKG_LIST}
