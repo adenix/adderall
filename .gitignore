@@ -1,6 +1,7 @@
 ### Application ###
 cover/
 test/
+internal/mock/
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/go,goland,visualstudiocode,vim,cmake,macos,windows,linux

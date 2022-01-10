@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/opentracing/opentracing-go"
@@ -228,7 +227,7 @@ func TestFactoryOption(t *testing.T) {
 func newHandlerFunc(response string) func(http.HandlerFunc) http.HandlerFunc {
 	return func(h http.HandlerFunc) http.HandlerFunc {
 		return func(rw http.ResponseWriter, r *http.Request) {
-			fmt.Fprintln(rw, response)
+			fmt.Fprint(rw, response)
 		}
 	}
 }
@@ -339,7 +338,7 @@ func assertOptionHandlerFunc(handler func(http.HandlerFunc) http.HandlerFunc, ex
 			t.Errorf("unexpected error: %q", err)
 		}
 
-		actual := strings.Replace(string(bytes), "\n", "", -1)
+		actual := string(bytes)
 		if string(actual) != expected {
 			t.Errorf("expected %q, got %q", expected, actual)
 		}
