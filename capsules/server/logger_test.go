@@ -29,3 +29,5 @@ func TestNoopLogger(t *testing.T) {
 type testLogger struct {
 	Logger
 }
+
+func (l *testLogger) InfoCtx(_ context.Context, _ string, _ ...interface{}) {}
