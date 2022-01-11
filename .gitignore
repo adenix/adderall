@@ -1,4 +1,5 @@
 ### Application ###
+bin/
 cover/
 test/
 internal/mock/

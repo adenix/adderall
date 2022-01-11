@@ -6,12 +6,55 @@ PKG_LIST := $(shell go list ${PKG}/... 		\
 	| grep -v /example | grep -v /example/  \
 	| grep -v /mock/)
 
+MODULES = . ./tools
+
+
+### Tools Binaries ###
+
+export GOBIN ?= $(shell pwd)/bin
+
+GOCOVERCOBERTURA = ${GOBIN}/gocover-cobertura
+MOCKGEN = ${GOBIN}/mockgen
+ERRCHECK = ${GOBIN}/errcheck
+GOLINT = ${GOBIN}/golint
+GOTESTSUM = ${GOBIN}/gotestsum
+STATICCHECK = ${GOBIN}/staticcheck
+
+${GOCOVERCOBERTURA}: tools/go.mod
+	cd tools && go install github.com/boumenot/gocover-cobertura
+
+${MOCKGEN}: tools/go.mod
+	cd tools && go install github.com/golang/mock/mockgen
+
+${ERRCHECK}: tools/go.mod
+	cd tools && go install github.com/kisielk/errcheck
+
+${GOLINT}: tools/go.mod
+	cd tools && go install golang.org/x/lint/golint
+
+${GOTESTSUM}: tools/go.mod
+	cd tools && go install gotest.tools/gotestsum
+
+${STATICCHECK}: tools/go.mod
+	cd tools && go install honnef.co/go/tools/cmd/staticcheck
+
+
+### Commands ###
+
 .PHONY: list
 list:
 	@for i in ${PKG_LIST}; do echo $$i; done
 
+.PHONY: install
+install:
+	$(foreach dir,$(MODULES),( cd $(dir) && go mod download) && ) true
+
+.PHONY: tidy
+tidy:
+	$(foreach dir,$(MODULES),(cd $(dir) && go mod tidy) &&) true
+
 .PHONY: generate
-generate:
+generate: ${MOCKGEN} clean-mock
 	@go generate
 
 .PHONY: clean-test
@@ -22,12 +65,17 @@ clean-test:
 clean-cover:
 	@rm -rf cover
 
+.PHONY: clean-bench
+clean-bench:
+	@rm -rf bench
+
 .PHONY: clean-mock
 clean-mock:
 	@rm -rf internal/mock
 
 .PHONY: clean
-clean: clean-test clean-cover clean-mock
+clean: clean-test clean-cover clean-bench clean-mock
+	@rm -rf bin/
 
 .PHONY: fmt
 fmt:
@@ -38,16 +86,16 @@ vet: generate
 	@go vet ${PKG_LIST}
 
 .PHONY: golint
-golint:
-	@go run golang.org/x/lint/golint ${PKG_LIST}
+golint: ${GOLINT}
+	@${GOLINT} ${PKG_LIST}
 
 .PHONY: staticcheck
-staticcheck: generate
-	@go run honnef.co/go/tools/cmd/staticcheck ${PKG_LIST}
+staticcheck: ${STATICCHECK} generate
+	@${STATICCHECK} ${PKG_LIST}
 
 .PHONY: errcheck
-errcheck: generate
-	@go run github.com/kisielk/errcheck ${PKG_LIST}
+errcheck: ${ERRCHECK} generate
+	@${ERRCHECK} ${PKG_LIST}
 
 .PHONY: lint
 lint: fmt vet golint staticcheck errcheck
@@ -57,9 +105,9 @@ test: clean-test clean-mock generate
 	@go test -cover ${PKG_LIST}
 
 .PHONY: test-report
-test-report: clean-test clean-mock generate
+test-report: ${GOTESTSUM} clean-test clean-mock generate
 	@mkdir -p test
-	@go run gotest.tools/gotestsum --junitfile test/report.xml --format testname
+	@${GOTESTSUM} --junitfile test/report.xml --format testname
 
 .PHONY: cover
 cover: clean-cover clean-mock generate
@@ -69,11 +117,11 @@ cover: clean-cover clean-mock generate
 	@go tool cover -func=cover/coverage.out
 
 .PHONY: cover-report
-cover-report: cover ## Generate global code coverage report in cobertura
-	@go run github.com/boumenot/gocover-cobertura < cover/coverage.out > cover/report.xml
+cover-report: ${GOCOVERCOBERTURA} cover
+	@${GOCOVERCOBERTURA} < cover/coverage.out > cover/report.xml
 
 .PHONY: cover-html
-cover-html: cover ## Generate global code coverage report in HTML
+cover-html: cover
 	@go tool cover -html=cover/coverage.out
 
 .PHONY: race
