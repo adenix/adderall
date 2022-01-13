@@ -118,6 +118,8 @@ type carrier struct {
 	fields []interface{}
 }
 
+var _ opentracing.TextMapWriter = (*carrier)(nil)
+
 func (c *carrier) Set(key, val string) {
 	c.fields = append(c.fields, key)
 	c.fields = append(c.fields, val)
