@@ -56,22 +56,22 @@ func NewLogger(t opentracing.Tracer, opts ...Option) (Logger, func()) {
 
 // Debug writes a debug level log message without context
 func (d *defaultLogger) Debug(msg string, keysAndValues ...interface{}) {
-	d.DebugCtx(context.Background(), msg, keysAndValues)
+	d.DebugCtx(context.Background(), msg, keysAndValues...)
 }
 
 // Info writes a info level log message without context
 func (d *defaultLogger) Info(msg string, keysAndValues ...interface{}) {
-	d.InfoCtx(context.Background(), msg, keysAndValues)
+	d.InfoCtx(context.Background(), msg, keysAndValues...)
 }
 
 // Warn writes a warn level log message without context
 func (d *defaultLogger) Warn(msg string, keysAndValues ...interface{}) {
-	d.WarnCtx(context.Background(), msg, keysAndValues)
+	d.WarnCtx(context.Background(), msg, keysAndValues...)
 }
 
 // Error writes a error level log message without context
 func (d *defaultLogger) Error(msg string, keysAndValues ...interface{}) {
-	d.ErrorCtx(context.Background(), msg, keysAndValues)
+	d.ErrorCtx(context.Background(), msg, keysAndValues...)
 }
 
 // DebugCtx writes a debug level log message with context

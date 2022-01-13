@@ -10,6 +10,7 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/swaggo/http-swagger v1.1.2
 	go.uber.org/zap v1.19.1
+	gotest.tools v2.2.0+incompatible
 )
 
 require (
@@ -22,6 +23,7 @@ require (
 	github.com/go-openapi/jsonreference v0.19.5 // indirect
 	github.com/go-openapi/spec v0.20.0 // indirect
 	github.com/go-openapi/swag v0.19.12 // indirect
+	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
