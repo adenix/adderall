@@ -55,7 +55,7 @@ func WithStacktraceKey(key string) Option {
 func WithHost(key string) Option {
 	return func(c *zap.Config) {
 		if host, err := os.Hostname(); err == nil {
-			c.InitialFields[key] = host
+			withInitalField(c, key, host)
 		}
 	}
 }
@@ -63,6 +63,13 @@ func WithHost(key string) Option {
 // WithPid provides an Option to add the pid to a provided key
 func WithPid(key string) Option {
 	return func(c *zap.Config) {
-		c.InitialFields[key] = int64(os.Getpid())
+		withInitalField(c, key, int64(os.Getpid()))
 	}
+}
+
+func withInitalField(c *zap.Config, key string, value interface{}) {
+	if c.InitialFields == nil {
+		c.InitialFields = make(map[string]interface{})
+	}
+	c.InitialFields[key] = value
 }
