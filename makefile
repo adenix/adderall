@@ -94,8 +94,12 @@ test: clean-mock generate
 
 .PHONY: cover
 cover: clean-cover clean-mock generate
-	@mkdir -p cover
 	@go test -race -covermode=atomic ${PKG_LIST}
+
+.PHONY: cover-report
+cover-report: clean-cover clean-mock generate
+	@mkdir -p cover
+	@go test -race -coverprofile=cover/coverage.txt -covermode=atomic ${PKG_LIST}
 
 .PHONY: cover-html
 cover-html: cover
