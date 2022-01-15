@@ -2,7 +2,7 @@
 
 <img align="right" width="159px" src="https://raw.githubusercontent.com/adenix/adderall/feature/readme/.github/images/gopher-adderall.png">
 
-[![Build Status](https://github.com/adenix/adderall/workflows/Run%20Tests/badge.svg?branch=main)](https://github.com/adenix/adderall/actions?query=branch%3Amain)
+[![Build Status](https://github.com/adenix/adderall/workflows/Run%20Tests/badge.svg?branch=feature/readme)](https://github.com/adenix/adderall/actions?query=branch%3Afeature%2Freadme)
 [![codecov](https://codecov.io/gh/adenix/adderall/branch/feature/readme/graph/badge.svg)](https://codecov.io/gh/adenix/adderall)
 [![Go Report Card](https://goreportcard.com/badge/go.adenix.dev/adderall)](https://goreportcard.com/report/go.adenix.dev/adderall)
 [![GoDoc](https://pkg.go.dev/badge/go.adenix.dev/adderall?status.svg)](https://pkg.go.dev/go.adenix.dev/adderall?tab=doc)
