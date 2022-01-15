@@ -13,15 +13,10 @@ MODULES = . ./tools
 
 export GOBIN ?= $(shell pwd)/bin
 
-GOCOVERCOBERTURA = ${GOBIN}/gocover-cobertura
 MOCKGEN = ${GOBIN}/mockgen
 ERRCHECK = ${GOBIN}/errcheck
 GOLINT = ${GOBIN}/golint
-GOTESTSUM = ${GOBIN}/gotestsum
 STATICCHECK = ${GOBIN}/staticcheck
-
-${GOCOVERCOBERTURA}: tools/go.mod
-	cd tools && go install github.com/boumenot/gocover-cobertura
 
 ${MOCKGEN}: tools/go.mod
 	cd tools && go install github.com/golang/mock/mockgen
@@ -31,9 +26,6 @@ ${ERRCHECK}: tools/go.mod
 
 ${GOLINT}: tools/go.mod
 	cd tools && go install golang.org/x/lint/golint
-
-${GOTESTSUM}: tools/go.mod
-	cd tools && go install gotest.tools/gotestsum
 
 ${STATICCHECK}: tools/go.mod
 	cd tools && go install honnef.co/go/tools/cmd/staticcheck
@@ -50,16 +42,12 @@ install:
 	$(foreach dir,$(MODULES),( cd $(dir) && go mod download) && ) true
 
 .PHONY: tidy
-tidy:
+tidy: generate
 	$(foreach dir,$(MODULES),(cd $(dir) && go mod tidy) &&) true
 
 .PHONY: generate
 generate: ${MOCKGEN} clean-mock
 	@go generate
-
-.PHONY: clean-test
-clean-test:
-	@rm -rf test
 
 .PHONY: clean-cover
 clean-cover:
@@ -74,7 +62,7 @@ clean-mock:
 	@rm -rf internal/mock
 
 .PHONY: clean
-clean: clean-test clean-cover clean-bench clean-mock
+clean: clean-cover clean-bench clean-mock
 	@rm -rf bin/
 
 .PHONY: fmt
@@ -101,28 +89,17 @@ errcheck: ${ERRCHECK} generate
 lint: fmt vet golint staticcheck errcheck
 
 .PHONY: test
-test: clean-test clean-mock generate
+test: clean-mock generate
 	@go test -cover ${PKG_LIST}
-
-.PHONY: test-report
-test-report: ${GOTESTSUM} clean-test clean-mock generate
-	@mkdir -p test
-	@${GOTESTSUM} --junitfile test/report.xml --format testname
 
 .PHONY: cover
 cover: clean-cover clean-mock generate
 	@mkdir -p cover
-	@echo 'mode: count' > cover/coverage.out
-	@echo ${PKG_LIST} | xargs -n1 -I{} sh -c 'go test -covermode=count -coverprofile=cover/coverage.tmp {} && tail -n +2 cover/coverage.tmp >> cover/coverage.out' && rm cover/coverage.tmp
-	@go tool cover -func=cover/coverage.out
-
-.PHONY: cover-report
-cover-report: ${GOCOVERCOBERTURA} cover
-	@${GOCOVERCOBERTURA} < cover/coverage.out > cover/report.xml
+	@go test -race -covermode=atomic ${PKG_LIST}
 
 .PHONY: cover-html
 cover-html: cover
-	@go tool cover -html=cover/coverage.out
+	@go tool cover -html=cover/coverage.txt
 
 .PHONY: race
 race:
