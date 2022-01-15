@@ -102,7 +102,7 @@ cover-report: clean-cover clean-mock generate
 	@go test -race -coverprofile=cover/coverage.txt -covermode=atomic ${PKG_LIST}
 
 .PHONY: cover-html
-cover-html: cover
+cover-html: cover-report
 	@go tool cover -html=cover/coverage.txt
 
 .PHONY: race

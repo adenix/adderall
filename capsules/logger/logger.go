@@ -51,7 +51,7 @@ func NewLogger(t opentracing.Tracer, opts ...Option) (Logger, func()) {
 
 	logger := &defaultLogger{l: zapLogger.Sugar(), tracer: t}
 
-	return logger, func() { _ = zapLogger.Sync() }
+	return logger, func() { logger.Sync() }
 }
 
 // Debug writes a debug level log message without context
@@ -104,14 +104,14 @@ func (d *defaultLogger) Sync() {
 }
 
 func (d *defaultLogger) getScopedLogger(ctx context.Context) *zap.SugaredLogger {
-	fields := make([]interface{}, 0)
+	c := newCarrier()
 
 	span := opentracing.SpanFromContext(ctx)
 	if span != nil {
-		_ = d.tracer.Inject(span.Context(), opentracing.TextMap, &carrier{fields})
+		_ = d.tracer.Inject(span.Context(), opentracing.TextMap, c)
 	}
 
-	return d.l.With(fields...)
+	return d.l.With(c.fields...)
 }
 
 type carrier struct {
@@ -119,6 +119,12 @@ type carrier struct {
 }
 
 var _ opentracing.TextMapWriter = (*carrier)(nil)
+
+func newCarrier() *carrier {
+	return &carrier{
+		fields: make([]interface{}, 0),
+	}
+}
 
 func (c *carrier) Set(key, val string) {
 	c.fields = append(c.fields, key)
