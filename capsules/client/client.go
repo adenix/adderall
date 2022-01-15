@@ -47,7 +47,7 @@ type Config struct {
 	RetryMax       *int
 }
 
-// defaultConfig provides a Config initalized with default values
+// defaultConfig provides a Config initialized with default values
 func defaultConfig() Config {
 	return Config{
 		TimeoutMs:      pointer.IntP(3000),

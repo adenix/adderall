@@ -211,7 +211,7 @@ type Config struct {
 	SwaggerFile          *string
 }
 
-// defaultConfig provides a Config initalized with default values
+// defaultConfig provides a Config initialized with default values
 func defaultConfig() Config {
 	return Config{
 		Port:                 pointer.IntP(8080),
