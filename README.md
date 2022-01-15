@@ -1,6 +1,6 @@
 # Adderall
 
-<img align="right" width="159px" src="https://raw.githubusercontent.com/adenix/adderall/.github/images/gopher-adderall.png">
+<img align="right" width="159px" src="https://raw.githubusercontent.com/adenix/adderall/feature/readme/.github/images/gopher-adderall.png">
 
 [![Build Status](https://github.com/adenix/adderall/workflows/Run%20Tests/badge.svg?branch=main)](https://github.com/adenix/adderall/actions?query=branch%3Amain)
 [![codecov](https://codecov.io/gh/adenix/adderall/branch/master/graph/badge.svg)](https://codecov.io/gh/adenix/adderall)
