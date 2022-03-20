@@ -1,6 +1,6 @@
 module go.adenix.dev/adderall/tools
 
-go 1.18
+go 1.17
 
 require (
 	github.com/golang/mock v1.1.1
