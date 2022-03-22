@@ -71,8 +71,7 @@ fmt:
 
 .PHONY: vet
 vet: generate
-	@echo "vet temporarily disabled"
-#	@go vet ${PKG_LIST}
+	@go vet ${PKG_LIST}
 
 .PHONY: golint
 golint: ${GOLINT}
