@@ -79,8 +79,7 @@ golint: ${GOLINT}
 
 .PHONY: staticcheck
 staticcheck: ${STATICCHECK} generate
-	@echo "staticcheck temporarily disabled"
-#	@${STATICCHECK} ${PKG_LIST}
+	@${STATICCHECK} ${PKG_LIST}
 
 .PHONY: errcheck
 errcheck: ${ERRCHECK} generate
