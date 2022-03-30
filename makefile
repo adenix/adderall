@@ -59,7 +59,7 @@ clean-bench:
 
 .PHONY: clean-mock
 clean-mock:
-	@rm -rf internal/mock
+	@rm -rf mock
 
 .PHONY: clean
 clean: clean-cover clean-bench clean-mock

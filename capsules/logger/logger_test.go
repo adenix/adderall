@@ -6,7 +6,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"testing"
 
-	mock "go.adenix.dev/adderall/internal/mock/tracing"
+	mock "go.adenix.dev/adderall/mock/tracing"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"

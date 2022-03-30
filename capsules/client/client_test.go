@@ -12,7 +12,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
-	mock "go.adenix.dev/adderall/internal/mock/tracing"
+	mock "go.adenix.dev/adderall/mock/tracing"
 )
 
 type assertResponse func(t *testing.T, response *http.Response)
