@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
-	mock "go.adenix.dev/adderall/internal/mock/zapcore"
+	mock "go.adenix.dev/adderall/mock/zapcore"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

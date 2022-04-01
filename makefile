@@ -19,16 +19,16 @@ GOLINT = ${GOBIN}/golint
 STATICCHECK = ${GOBIN}/staticcheck
 
 ${MOCKGEN}: tools/go.mod
-	cd tools && go install github.com/golang/mock/mockgen
+	@cd tools && go install github.com/golang/mock/mockgen
 
 ${ERRCHECK}: tools/go.mod
-	cd tools && go install github.com/kisielk/errcheck
+	@cd tools && go install github.com/kisielk/errcheck
 
 ${GOLINT}: tools/go.mod
-	cd tools && go install golang.org/x/lint/golint
+	@cd tools && go install golang.org/x/lint/golint
 
 ${STATICCHECK}: tools/go.mod
-	cd tools && go install honnef.co/go/tools/cmd/staticcheck
+	@cd tools && go install honnef.co/go/tools/cmd/staticcheck
 
 
 ### Commands ###
@@ -59,7 +59,7 @@ clean-bench:
 
 .PHONY: clean-mock
 clean-mock:
-	@rm -rf internal/mock
+	@rm -rf mock
 
 .PHONY: clean
 clean: clean-cover clean-bench clean-mock
